@@ -55,14 +55,14 @@ See `AI_INTEGRATION.md` for production ML integration guide.
 ### Installation
 
 1. Clone and install:
-```bash
+\`\`\`bash
 git clone <repository-url>
 cd localhelp
 npm install
-```
+\`\`\`
 
 2. Set up environment variables:
-```bash
+\`\`\`bash
 # .env.local
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
@@ -73,12 +73,12 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
 # Optional
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_maps_key
-```
+\`\`\`
 
 3. Run development server:
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 Open [http://localhost:3000](http://localhost:3000)
 
@@ -99,7 +99,7 @@ Open [http://localhost:3000](http://localhost:3000)
    - Google Sign-In (recommended)
 
 3. Set Firestore security rules (example):
-```javascript
+\`\`\`javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -117,11 +117,11 @@ service cloud.firestore {
     // Add rules for other collections
   }
 }
-```
+\`\`\`
 
 ## Project Structure
 
-```
+\`\`\`
 localhelp/
 ├── app/
 │   ├── (routes)/
@@ -154,7 +154,7 @@ localhelp/
 │   └── index.ts             # TypeScript definitions
 ├── AI_INTEGRATION.md        # AI/ML integration guide
 └── README.md
-```
+\`\`\`
 
 ## User Roles
 
@@ -194,9 +194,9 @@ Users can have multiple roles simultaneously.
 3. Add environment variables
 4. Deploy!
 
-```bash
+\`\`\`bash
 vercel deploy
-```
+\`\`\`
 
 ### Other Platforms
 

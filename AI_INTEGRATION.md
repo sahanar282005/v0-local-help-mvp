@@ -21,12 +21,12 @@ All mock AI services are located in `lib/mock-ai/` and use rule-based logic. The
 - Custom NLP model trained on historical urgency data
 
 **API Interface:**
-```typescript
+\`\`\`typescript
 detectUrgency(
   description: string,
   factors?: { keywords: string[], timeOfDay: number }
 ): UrgencyLevel
-```
+\`\`\`
 
 ### 2. Trust Score Engine (`trust-score.ts`)
 
@@ -46,7 +46,7 @@ detectUrgency(
 - Ensemble of multiple trust signals
 
 **API Interface:**
-```typescript
+\`\`\`typescript
 calculateTrustScore(factors: {
   ratings: number[]
   completedTransactions: number
@@ -54,7 +54,7 @@ calculateTrustScore(factors: {
   verificationStatus: boolean
   reports: number
 }): number // 0-100
-```
+\`\`\`
 
 ### 3. Fair Pricing Engine (`pricing-engine.ts`)
 
@@ -73,14 +73,14 @@ calculateTrustScore(factors: {
 - Market-aware pricing with competitor data
 
 **API Interface:**
-```typescript
+\`\`\`typescript
 calculateFairPrice(factors: {
   serviceType: string
   urgency: UrgencyLevel
   distance: number
   timeOfDay: number
 }): number
-```
+\`\`\`
 
 ### 4. Smart Matching Engine (`smart-matching.ts`)
 
@@ -102,7 +102,7 @@ calculateFairPrice(factors: {
 - Multi-armed bandit for exploration/exploitation
 
 **API Interface:**
-```typescript
+\`\`\`typescript
 matchItems(
   userLocation: { lat: number, lng: number },
   items: Item[],
@@ -114,7 +114,7 @@ matchTechnicians(
   technicians: Technician[],
   urgency: string
 ): Technician[]
-```
+\`\`\`
 
 ## Integration Steps for Production
 
@@ -142,7 +142,7 @@ For each service:
 
 Example:
 
-```typescript
+\`\`\`typescript
 // Before (Mock)
 export function detectUrgency(description: string): UrgencyLevel {
   if (description.includes("emergency")) return "emergency"
@@ -165,18 +165,18 @@ export async function detectUrgency(description: string): Promise<UrgencyLevel> 
     return "normal"
   }
 }
-```
+\`\`\`
 
 ### Step 3: Add Environment Variables
 
-```bash
+\`\`\`bash
 # .env.local
 OPENAI_API_KEY=your_key_here
 # or
 GOOGLE_AI_API_KEY=your_key_here
 # or custom ML endpoint
 ML_API_ENDPOINT=https://your-ml-api.com
-```
+\`\`\`
 
 ### Step 4: Testing & Monitoring
 
@@ -193,9 +193,9 @@ The app includes placeholders for Google Maps. To integrate:
 2. Enable Maps JavaScript API and Geocoding API
 3. Add to environment:
 
-```bash
+\`\`\`bash
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key
-```
+\`\`\`
 
 4. Replace map placeholders in:
    - `/emergency/status/page.tsx`
@@ -205,7 +205,7 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key
 
 For admin analytics, integrate Google Charts:
 
-```typescript
+\`\`\`typescript
 import { Chart } from "react-google-charts"
 
 <Chart
@@ -218,7 +218,7 @@ import { Chart } from "react-google-charts"
   ]}
   options={{ title: "Request Trends" }}
 />
-```
+\`\`\`
 
 ## Data Collection for Model Training
 
