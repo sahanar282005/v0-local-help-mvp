@@ -32,15 +32,27 @@ export default function TechnicianPage() {
   const [selectedCategory, setSelectedCategory] = useState("All")
 
   useEffect(() => {
+    console.log("[v0] Loading technicians from Firestore...")
     loadNearbyTechnicians()
   }, [])
 
   const loadNearbyTechnicians = async () => {
-    // Mock: Load verified technicians
-    // In production, use geolocation queries and verification status
-    const { data } = await queryDocuments("users", [where("role", "==", "technician"), where("verified", "==", true)])
-    setTechnicians(data as Technician[])
-    setLoading(false)
+    try {
+      const { data, error } = await queryDocuments("users", [where("role", "==", "technician")])
+
+      if (error) {
+        console.error("[v0] Error loading technicians:", error)
+        setTechnicians([])
+      } else {
+        console.log("[v0] Loaded technicians:", data)
+        setTechnicians(data as Technician[])
+      }
+    } catch (err) {
+      console.error("[v0] Exception loading technicians:", err)
+      setTechnicians([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filteredTechnicians = technicians.filter((tech) => {

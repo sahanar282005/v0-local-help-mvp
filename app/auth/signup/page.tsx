@@ -27,14 +27,34 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent multiple submissions
+    if (loading) return
+
     setLoading(true)
+
+    console.log("[v0] Signup attempt with email:", email, "role:", role)
 
     const { user, error } = await signupWithEmail(email, password)
 
     if (error) {
+      console.log("[v0] Signup error:", error)
+
+      let errorMessage = error
+      // More comprehensive error handling
+      if (error.includes("auth/email-already-in-use")) {
+        errorMessage = "This email is already registered. Please login instead."
+      } else if (error.includes("auth/weak-password")) {
+        errorMessage = "Password must be at least 6 characters long."
+      } else if (error.includes("auth/invalid-email")) {
+        errorMessage = "Please enter a valid email address."
+      } else if (error.includes("auth/network-request-failed")) {
+        errorMessage = "Network error. Please check your internet connection."
+      }
+
       toast({
         title: "Signup failed",
-        description: error,
+        description: errorMessage,
         variant: "destructive",
       })
       setLoading(false)
@@ -42,7 +62,8 @@ export default function SignupPage() {
     }
 
     if (user) {
-      // Create user profile in Firestore
+      console.log("[v0] Signup successful, creating profile for user:", user.uid)
+
       const { error: profileError } = await createDocument(
         "users",
         {
@@ -50,6 +71,7 @@ export default function SignupPage() {
           name,
           role,
           trustScore: 50,
+          createdAt: new Date().toISOString(),
           location: {
             lat: 0,
             lng: 0,
@@ -60,18 +82,26 @@ export default function SignupPage() {
       )
 
       if (profileError) {
+        console.log("[v0] Profile creation error:", profileError)
         toast({
           title: "Profile creation failed",
           description: profileError,
           variant: "destructive",
         })
-      } else {
-        toast({
-          title: "Welcome to LocalHelp!",
-          description: "Your account has been created successfully.",
-        })
-        router.push("/")
+        setLoading(false)
+        return
       }
+
+      console.log("[v0] Profile created successfully, redirecting...")
+      toast({
+        title: "Welcome to LocalHelp!",
+        description: "Your account has been created successfully.",
+      })
+
+      // Wait longer for Firestore and auth state to fully sync
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      router.refresh()
+      router.push("/")
     }
 
     setLoading(false)
@@ -79,26 +109,52 @@ export default function SignupPage() {
 
   const handleGoogleSignup = async () => {
     setLoading(true)
+    console.log("[v0] Google signup attempt")
+
     const { user, error } = await loginWithGoogle()
 
     if (error) {
+      console.log("[v0] Google signup error:", error)
       toast({
         title: "Signup failed",
         description: error,
         variant: "destructive",
       })
-    } else if (user) {
-      // Create user profile
-      await createDocument(
+      setLoading(false)
+      return
+    }
+
+    if (user) {
+      console.log("[v0] Google signup successful, creating profile for user:", user.uid)
+
+      const { error: profileError } = await createDocument(
         "users",
         {
-          email: user.email,
+          email: user.email || "",
           name: user.displayName || "User",
-          role: "user",
+          role: "user" as UserRole,
           trustScore: 50,
+          createdAt: new Date().toISOString(),
+          location: {
+            lat: 0,
+            lng: 0,
+            address: "Location not set",
+          },
         },
         user.uid,
       )
+
+      if (profileError) {
+        console.log("[v0] Profile creation error:", profileError)
+      }
+
+      toast({
+        title: "Welcome to LocalHelp!",
+        description: "Your account has been created successfully.",
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      router.refresh()
       router.push("/")
     }
 

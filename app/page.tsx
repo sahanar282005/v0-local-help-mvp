@@ -1,28 +1,73 @@
 "use client"
 
 import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowRight, Package, Wrench, AlertCircle, MapPin, Star, Shield } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export default function LandingPage() {
-  const { user, loading } = useAuth()
+  const { user, userProfile, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    console.log("[v0] Page - Auth state:", {
+      user: user?.uid || "null",
+      userProfile: userProfile?.name || "null",
+      role: userProfile?.role || "null",
+      loading,
+    })
+  }, [user, userProfile, loading])
+
+  useEffect(() => {
+    if (user && userProfile && userProfile.role === "technician") {
+      console.log("[v0] Redirecting technician to technician dashboard")
+      router.push("/technician-dashboard")
+    }
+  }, [user, userProfile, router])
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
       </div>
     )
   }
 
-  if (user) {
+  if (user && userProfile) {
+    if (userProfile.role === "technician") {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">Redirecting to technician dashboard...</p>
+          </div>
+        </div>
+      )
+    }
+    console.log("[v0] Showing authenticated home page")
     return <HomePage />
   }
 
+  if (user && !userProfile) {
+    console.log("[v0] User exists but no profile found, showing loading")
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Setting up your profile...</p>
+        </div>
+      </div>
+    )
+  }
+
+  console.log("[v0] Showing landing page")
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/30">
       {/* Hero Section */}

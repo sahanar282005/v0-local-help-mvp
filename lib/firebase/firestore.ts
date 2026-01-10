@@ -15,6 +15,8 @@ import {
   addDoc,
   serverTimestamp,
   Timestamp,
+  onSnapshot,
+  type QueryConstraint,
 } from "firebase/firestore"
 
 // Generic Firestore operations
@@ -88,6 +90,33 @@ export const queryDocuments = async (collectionName: string, constraints: any[] 
   } catch (error: any) {
     return { data: [], error: error.message }
   }
+}
+
+// Real-time listener support for live updates
+export const subscribeToDocument = (collectionName: string, documentId: string, callback: (data: any) => void) => {
+  const docRef = doc(db, collectionName, documentId)
+  return onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      callback({ id: docSnap.id, ...docSnap.data() })
+    } else {
+      callback(null)
+    }
+  })
+}
+
+export const subscribeToQuery = (
+  collectionName: string,
+  constraints: QueryConstraint[] = [],
+  callback: (data: any[]) => void,
+) => {
+  const q = query(collection(db, collectionName), ...constraints)
+  return onSnapshot(q, (querySnapshot) => {
+    const documents = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    callback(documents)
+  })
 }
 
 // Export Firestore query helpers for use in other files

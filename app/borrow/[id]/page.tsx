@@ -49,19 +49,21 @@ export default function ItemDetailPage() {
       timeOfDay: new Date().getHours(),
     })
 
-    const { id, error } = await createDocument("borrow_requests", {
+    const { id, error } = await createDocument("requests", {
+      type: "borrow",
+      createdBy: userProfile.id,
+      createdByName: userProfile.name,
+      targetId: item.ownerId,
+      targetName: item.ownerName,
       itemId: item.id,
       itemName: item.name,
-      borrowerId: userProfile.id,
-      borrowerName: userProfile.name,
-      ownerId: item.ownerId,
       status: "pending",
       urgency,
+      price: item.depositAmount,
       startDate,
       endDate,
-      depositPaid: false,
       location: item.location,
-      notes,
+      description: notes || `Borrow request for ${item.name}`,
     })
 
     if (error) {

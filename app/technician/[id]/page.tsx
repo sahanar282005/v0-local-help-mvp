@@ -56,16 +56,17 @@ export default function TechnicianDetailPage() {
       timeOfDay: selectedDate.getHours(),
     })
 
-    const { id, error } = await createDocument("technician_requests", {
-      technicianId: technician.id,
-      technicianName: technician.name,
-      userId: userProfile.id,
-      userName: userProfile.name,
+    const { id, error } = await createDocument("requests", {
+      type: "service",
+      createdBy: userProfile.id,
+      createdByName: userProfile.name,
+      targetId: technician.id,
+      targetName: technician.name,
       service: technician.skills[0] || "Service",
       description: serviceDescription,
       status: "pending",
       urgency,
-      estimatedPrice,
+      price: estimatedPrice,
       location: userProfile.location,
       scheduledTime: selectedDate,
     })

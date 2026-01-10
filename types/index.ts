@@ -1,9 +1,11 @@
 // Type definitions for the LocalHelp application
 import type { Timestamp } from "firebase/firestore"
 
-export type UserRole = "user" | "technician" | "item_owner" | "admin"
+export type UserRole = "user" | "technician" | "admin"
 
-export type RequestStatus = "pending" | "accepted" | "in_progress" | "completed" | "cancelled"
+export type RequestStatus = "created" | "pending" | "accepted" | "in_progress" | "completed" | "rejected" | "cancelled"
+
+export type RequestType = "service" | "borrow"
 
 export type UrgencyLevel = "normal" | "priority" | "emergency"
 
@@ -58,45 +60,31 @@ export interface Item {
   updatedAt: Timestamp
 }
 
-export interface BorrowRequest {
+export interface Request {
   id: string
-  itemId: string
-  itemName: string
-  borrowerId: string
-  borrowerName: string
-  ownerId: string
+  type: RequestType
+  createdBy: string
+  createdByName: string
+  targetId: string
+  targetName?: string
   status: RequestStatus
   urgency: UrgencyLevel
-  startDate: Timestamp
-  endDate: Timestamp
-  depositPaid: boolean
-  location: {
-    lat: number
-    lng: number
-    address: string
-  }
-  createdAt: Timestamp
-  updatedAt: Timestamp
-}
-
-export interface TechnicianRequest {
-  id: string
-  technicianId: string
-  technicianName: string
-  userId: string
-  userName: string
-  service: string
+  price: number
   description: string
-  status: RequestStatus
-  urgency: UrgencyLevel
-  estimatedPrice: number
   location: {
     lat: number
     lng: number
     address: string
   }
+  itemId?: string
+  itemName?: string
+  service?: string
+  startDate?: Timestamp
+  endDate?: Timestamp
   scheduledTime?: Timestamp
   completedTime?: Timestamp
+  acceptedAt?: Timestamp
+  rejectedReason?: string
   createdAt: Timestamp
   updatedAt: Timestamp
 }
@@ -105,7 +93,7 @@ export interface EmergencyLog {
   id: string
   userId: string
   userName: string
-  type: "borrow" | "technician"
+  type: RequestType
   description: string
   location: {
     lat: number
@@ -122,7 +110,7 @@ export interface EmergencyLog {
 export interface Rating {
   id: string
   requestId: string
-  requestType: "borrow" | "technician"
+  requestType: RequestType
   raterId: string
   ratedId: string
   rating: number
@@ -133,10 +121,29 @@ export interface Rating {
 export interface Transaction {
   id: string
   requestId: string
-  requestType: "borrow" | "technician"
+  requestType: RequestType
   userId: string
   amount: number
   type: "deposit" | "payment" | "refund"
   status: "pending" | "completed" | "failed"
   createdAt: Timestamp
+}
+
+export interface TechnicianStatus {
+  userId: string
+  online: boolean
+  lastSeen: Timestamp
+  currentLocation?: {
+    lat: number
+    lng: number
+  }
+}
+
+export interface Earnings {
+  technicianId: string
+  month: string
+  totalEarnings: number
+  completedJobs: number
+  cancelledJobs: number
+  averageRating: number
 }

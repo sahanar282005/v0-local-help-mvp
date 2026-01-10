@@ -22,21 +22,54 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Prevent multiple submissions
+    if (loading) return
+
     setLoading(true)
+
+    console.log("[v0] Login attempt with email:", email)
 
     const { user, error } = await loginWithEmail(email, password)
 
     if (error) {
+      console.log("[v0] Login error:", error)
+
+      let errorMessage = error
+      // More specific error handling
+      if (error.includes("auth/invalid-credential") || error.includes("auth/wrong-password")) {
+        errorMessage = "Invalid email or password. Please check your credentials and try again."
+      } else if (error.includes("auth/user-not-found")) {
+        errorMessage = "No account found with this email. Please sign up first."
+      } else if (error.includes("auth/too-many-requests")) {
+        errorMessage = "Too many failed attempts. Please try again later or reset your password."
+      } else if (error.includes("auth/invalid-email")) {
+        errorMessage = "Please enter a valid email address."
+      } else if (error.includes("auth/network-request-failed")) {
+        errorMessage = "Network error. Please check your internet connection."
+      }
+
       toast({
         title: "Login failed",
-        description: error,
+        description: errorMessage,
         variant: "destructive",
       })
-    } else if (user) {
+      setLoading(false)
+      return
+    }
+
+    if (user) {
+      console.log("[v0] Login successful, user ID:", user.uid)
+      console.log("[v0] Redirecting to home page...")
+
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in.",
       })
+
+      // Wait longer for auth state to propagate
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      router.refresh()
       router.push("/")
     }
 
@@ -45,15 +78,30 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setLoading(true)
+    console.log("[v0] Google login attempt")
+
     const { user, error } = await loginWithGoogle()
 
     if (error) {
+      console.log("[v0] Google login error:", error)
       toast({
         title: "Login failed",
         description: error,
         variant: "destructive",
       })
-    } else if (user) {
+      setLoading(false)
+      return
+    }
+
+    if (user) {
+      console.log("[v0] Google login successful, user:", user.uid)
+      toast({
+        title: "Welcome back!",
+        description: "You've successfully logged in.",
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      router.refresh()
       router.push("/")
     }
 
@@ -92,7 +140,12 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Password</Label>
+              <Link href="/auth/reset-password" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"

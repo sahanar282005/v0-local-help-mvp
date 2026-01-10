@@ -29,12 +29,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges(async (firebaseUser) => {
+      console.log("[v0] Auth state changed, user:", firebaseUser?.uid || "null")
       setUser(firebaseUser)
 
       if (firebaseUser) {
-        // Fetch user profile from Firestore
-        const { data } = await getDocument("users", firebaseUser.uid)
-        setUserProfile(data as User | null)
+        console.log("[v0] Fetching user profile for:", firebaseUser.uid)
+
+        let retries = 0
+        let profile = null
+
+        while (retries < 3 && !profile) {
+          const { data } = await getDocument("users", firebaseUser.uid)
+          profile = data as User | null
+
+          if (!profile && retries < 2) {
+            console.log("[v0] Profile not found, retrying in 500ms...")
+            await new Promise((resolve) => setTimeout(resolve, 500))
+          }
+          retries++
+        }
+
+        if (profile) {
+          console.log("[v0] User profile loaded:", profile.name, profile.role)
+        } else {
+          console.log("[v0] User profile not found after retries")
+        }
+
+        setUserProfile(profile)
       } else {
         setUserProfile(null)
       }

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { MapPin, Search, Package, ArrowLeft, Star, Shield } from "lucide-react"
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
-import { queryDocuments, where } from "@/lib/firebase/firestore"
+import { queryDocuments } from "@/lib/firebase/firestore"
 import type { Item } from "@/types"
 import { getTrustBadge } from "@/lib/mock-ai/trust-score"
 
@@ -19,15 +19,27 @@ export default function BorrowPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
+    console.log("[v0] Loading items from Firestore...")
     loadNearbyItems()
   }, [])
 
   const loadNearbyItems = async () => {
-    // Mock: Load available items
-    // In production, use geolocation queries
-    const { data } = await queryDocuments("items", [where("available", "==", true)])
-    setItems(data as Item[])
-    setLoading(false)
+    try {
+      const { data, error } = await queryDocuments("items", [])
+
+      if (error) {
+        console.error("[v0] Error loading items:", error)
+        setItems([])
+      } else {
+        console.log("[v0] Loaded items:", data)
+        setItems(data as Item[])
+      }
+    } catch (err) {
+      console.error("[v0] Exception loading items:", err)
+      setItems([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -88,8 +100,8 @@ export default function BorrowPage() {
           </div>
         )}
 
-        {/* Add Item Button (for item owners) */}
-        {userProfile?.role === "item_owner" && (
+        {/* Add Item Button (for all authenticated users) */}
+        {userProfile && (
           <div className="mt-12 text-center">
             <Button asChild size="lg" className="gap-2">
               <Link href="/borrow/add">
