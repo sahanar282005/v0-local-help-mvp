@@ -63,7 +63,7 @@ npm install
 
 2. Set up environment variables:
 \`\`\`bash
-# .env.local
+# .env.local ( create ".env.local" file in the project root to run the application)
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCD2EE22OGo2bT3osP7WjA0k8yPdkf04SA
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhelp-mvp.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=localhelp-mvp
